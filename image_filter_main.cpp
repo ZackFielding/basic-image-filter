@@ -6,8 +6,8 @@
 #include <map>
 
 //TO-DO:
-	// - figure out best method for handling arrays of string streams
 	// - test to ensure generate_image block works
+	// 		[]: currently getting weird single column data in output image (RBG value ~47,000)
 	// - add other image filtering techniques (date/time/border?)
 	// - add user input
 	// - add option to use binary files
@@ -44,17 +44,15 @@ void get_image_headers(std::fstream& read_image, std::fstream& open_image)
 void generate_image(std::fstream& read_image, std::fstream& open_image)
 {
 	std::string temp;
-	std::stringstream Rss, Gss, Bss;
-	//stringstream does not have copy op
-	// need to update block now that it's ptr to ss OR find way to force move of ss into array
-	std::array<std::stringstream*,3> ss_array {&Rss, &Gss, &Bss}; 
+	std::array<std::stringstream,3> ss_array;	
 	auto ss_array_s_it {ss_array.begin()};
 	std::map<char, const int>RGB_map{
-			{'R', 25},
-			{'G', 10},
-			{'B', 50}};
+			{'R', 0},
+			{'G', 0},
+			{'B', 0}};
 	std::array<char, 3> char_array {'R', 'G', 'B'};
 	auto st_it {char_array.begin()}, end_it {char_array.end()};
+	int adj_val {0}; // will hold corrected RGB value
 
 	while(!read_image.eof())
 	{
@@ -65,21 +63,25 @@ void generate_image(std::fstream& read_image, std::fstream& open_image)
 			{
 				// if key value does not exist -> returns end iterator
 				// key exists -> check if filter can be applied 
-				*ss_array_s_it << std::dec << temp; // pipe temp as dec into array of stringstreams
-				cf =  RGB_map.at(*st_it);
-				if ((*ss_array_s_it.str() + cf) <= 250)
+				*ss_array_s_it << temp; // pipe temp as dec into array of stringstreams
+				adj_val = std::stoi(ss_array_s_it->str()) + RGB_map.at(*st_it);
+				if (adj_val <= 250)
 				{
-					o_image << (*ss_array_s_it.str() + cf);
+					open_image << adj_val << " ";
 				}
-				*ss_array_s_it.str(""); // reset string stream
+				ss_array_s_it->str(""); // reset string stream
+			}else
+			{
+				open_image << temp << " ";
 			}
+			if(*st_it == 'B')
+				open_image << '\n';
 			++st_it; // need to ++ start it even if no key found on current loop
 			++ss_array_s_it;
 		}
-		st_it = char_arr.begin(); // reset to start prior to next RGB loop
+		st_it = char_array.begin(); // reset to start prior to next RGB loop
 		ss_array_s_it = ss_array.begin(); // reset stringstream array iterator
 	}
-	
 }
 
 int main()
