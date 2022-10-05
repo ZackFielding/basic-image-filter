@@ -10,17 +10,20 @@
 bool get_file_names_types(char& file_type, std::array<char, 50>& read_file,
 		std::array<char, 50>& open_file)
 {
-	std::cout << "Enter file name followed by ENTER: " << std::endl;
-	std::cin.getline(&read_file.at(0), sizeof read_file, '\n');
-	std::cout << "Is the file BINARY [B] or DECIMAL [D]: " << std::endl;
-	char ans;
-	// FIX -> infinite loop and too tired to fix right now
-	//  std::cin.ignore() ??
-	while (std::cin.getline(&ans, sizeof ans, '\n'))
+	std::cout << "Enter file name (with file type post-fix, e.g., .ppm) and hit <ENTER>: " << std::endl;
+	std::cin.getline(&read_file.at(0), (sizeof read_file)-1, '\n');
+	generateOutputFile(read_file, open_file); // auto gen new open file name
+	std::cout << "Is the file BINARY [B] or DECIMAL [D]. " << std::endl;
+	const std::map<char, std::string> type_return {{'B', "Binary"}, {'D', "Decimal"}};
+	char ans {};
+	constexpr char b[]{"B"}, d[]{"D"};
+	while (std::cin >> ans)
 	{
-		if (std::strncmp(&ans, reinterpret_cast<char*>('B'), 1) == 0 || 
-				std::strncmp(&ans, reinterpret_cast<char*>('D'), 1) == 0)
-				return true;
+		if (std::strncmp(&ans, b, 1) == 0 || std::strncmp(&ans, d, 1) == 0)
+		{
+			std::cout << type_return.at(ans) << " file type selected." << std::endl;
+			return true;
+		}
 		else
 		{
 			std::cout << "Enter valid selection - [B] BINARY or [D] DECIMAL." 
@@ -28,6 +31,25 @@ bool get_file_names_types(char& file_type, std::array<char, 50>& read_file,
 		}
 	}
 	return false;
+}
+
+void generateOutputFile(const std::array<char, 50>& read_file, std::array<char, 50>& open_file)
+{
+	constexpr char append_str[] {"_updated."};
+	unsigned ind {0}, cor_fac {0};
+
+	while (read_file.at(ind) != '\0')
+	{
+		if (read_file.at(ind) != '.')
+			open_file.at(ind++ + cor_fac) = read_file.at(ind);
+		else 
+		{
+			std::strcat(&open_file.at(0), append_str);
+			++ind;
+			cor_fac = (sizeof append_str) - 1; // set correction fac for next loop
+		}
+	}
+	std::cout.write(&open_file.at(0), sizeof open_file) << " [new file].\n"; 
 }
 
 template<typename SIZE>

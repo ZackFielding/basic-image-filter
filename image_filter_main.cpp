@@ -14,16 +14,15 @@
 
 int main()
 {
-	//std::ifstream r_image;
-	//std::ofstream o_image;
+	std::ifstream r_image;
+	std::ofstream o_image;
 	std::array<char, 50> read_image_file_name, open_image_file_name;
+	read_image_file_name.fill('\0');
+	open_image_file_name.fill('\0');
 
 	char file_type;
-	while (!file_type)
-	{
-		get_file_names_types(file_type, read_image_file_name,
-			open_image_file_name);
-	}
+	while (!get_file_names_types(file_type, read_image_file_name,
+			open_image_file_name)){}
 
 	/*
 	r_image.open("bird2.ppm");

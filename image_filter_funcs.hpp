@@ -6,6 +6,8 @@
 
 bool get_file_names_types(char&, std::array<char, 50>&, std::array<char, 50>&);
 
+void generateOutputFile(const std::array<char, 50>&, std::array<char, 50>&);
+
 template<typename SIZE>
 void getAndPut(std::fstream&, char [], const SIZE&);
 
